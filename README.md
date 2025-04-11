@@ -1,4 +1,4 @@
-# Yoliday Portfolio Dashboard (Frontend)
+# Yoliday Portfolio Dashboard 
 
 A responsive portfolio dashboard built using **React + Vite + Bootstrap** based on a given Figma design. This project is part of the Yoliday Full Stack Developer Assessment.
 
