@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react';
-import ProjectCard from '../components/ProjectCard';
+import ProjectCard from './ProjectCard';
+import {
+  fetchProjects,
+  addProject,
+  fetchSavedProjectIds,
+  saveProjectToDB,
+  unsaveProjectFromDB,
+  deleteProjectFromDB
+} from '../services/projectService';
+
 
 const Portfolio = () => {
   const [projects, setProjects] = useState([]);
@@ -15,29 +24,51 @@ const Portfolio = () => {
     image: '',
   });
 
-  const getProjects = () => {
-    const dummyProjects = [
-      { id: 1, title: "Kemampuan Merangkum Tulisan", description: "Lorem ipsum dolor sit amet consectetur. Nulla risus malesuada at duis...", author: "Ravi Kumar", language: "Bahasa Sunda", image: "https://via.placeholder.com/300x200", category: "Project" },
-      { id: 2, title: "Exploring Bali Together", description: "Trip experience to Bali with friends and solo travelers!", author: "Sita Devi", language: "Bahasa Indonesia", image: "https://via.placeholder.com/300x200", category: "Project" },
-      { id: 3, title: "Mountain Escape: Manali Trek", description: "A peaceful 3-day journey to Manali hills...", author: "Amit Raj", language: "English", image: "https://via.placeholder.com/300x200", category: "Project" },
-      { id: 4, title: "Achievement: 1000+ Downloads", description: "One of the most downloaded writing guides from our platform.", author: "Sudha Rani", language: "Hindi", image: "https://via.placeholder.com/300x200", category: "Achievement" },
-      { id: 5, title: "My React Project", description: "A clean and responsive portfolio made in React.", author: "Sudheeshna", language: "English", image: "https://via.placeholder.com/300x200", category: "Project" }
-    ];
-    setProjects(dummyProjects);
-  };
-
   useEffect(() => {
     getProjects();
+    getSavedProjects(); 
   }, []);
+  
 
-  const handleSave = (projectId) => {
-    if (!savedProjects.includes(projectId)) {
-      setSavedProjects([...savedProjects, projectId]);
-      setProjects((prevProjects) => {
-        const projectToMove = prevProjects.find((p) => p.id === projectId);
-        const remainingProjects = prevProjects.filter((p) => p.id !== projectId);
-        return [...remainingProjects, projectToMove];
-      });
+  const getProjects = async () => {
+    try {
+      const data = await fetchProjects();
+      setProjects(data);
+    } catch (err) {
+      console.error('Error fetching projects:', err);
+    }
+  };
+
+  const getSavedProjects = async () => {
+    try {
+      const ids = await fetchSavedProjectIds();
+      console.log("✅ Saved project IDs from backend:", ids); // 👈 Add this
+      setSavedProjects(ids);
+    } catch (err) {
+      console.error('❌ Failed to fetch saved projects:', err);
+    }
+  };
+  
+
+  const handleSave = async (projectId) => {
+    try {
+      if (savedProjects.includes(projectId)) {
+        // 🔁 Unsave project
+        await unsaveProjectFromDB(projectId);
+        setSavedProjects((prev) => prev.filter((id) => id !== projectId));
+      } else {
+        // ✅ Save project
+        await saveProjectToDB(projectId);
+        setSavedProjects((prev) => [...prev, projectId]);
+  
+        setProjects((prev) => {
+          const projectToMove = prev.find((p) => p.id === projectId);
+          const remaining = prev.filter((p) => p.id !== projectId);
+          return [...remaining, projectToMove];
+        });
+      }
+    } catch (err) {
+      console.error('Save/Unsave failed:', err);
     }
   };
 
@@ -46,7 +77,7 @@ const Portfolio = () => {
     setNewProject((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddProject = (e) => {
+  const handleAddProject = async (e) => {
     e.preventDefault();
     const form = e.target;
     if (!form.checkValidity()) {
@@ -55,9 +86,7 @@ const Portfolio = () => {
     }
 
     const { title, description, author, language, image } = newProject;
-    const newId = projects.length ? Math.max(...projects.map(p => p.id)) + 1 : 1;
     const newEntry = {
-      id: newId,
       title,
       description,
       author,
@@ -66,21 +95,34 @@ const Portfolio = () => {
       category: "Project"
     };
 
-    setProjects([newEntry, ...projects]);
-    setNewProject({ title: '', description: '', author: '', language: '', image: '' });
+    try {
+      const created = await addProject(newEntry);
+      setProjects((prev) => [created, ...prev]);
+      setNewProject({ title: '', description: '', author: '', language: '', image: '' });
 
-    // ✅ Close modal safely
-    const modalEl = document.getElementById('addProjectModal');
-    let modal = bootstrap.Modal.getInstance(modalEl);
-    if (!modal) modal = new bootstrap.Modal(modalEl);
-    modal.hide();
+      const modalEl = document.getElementById('addProjectModal');
+      let modal = bootstrap.Modal.getInstance(modalEl);
+      if (!modal) modal = new bootstrap.Modal(modalEl);
+      modal.hide();
 
-    // ✅ Remove backdrop manually
-    document.body.classList.remove('modal-open');
-    const backdrop = document.querySelector('.modal-backdrop');
-    if (backdrop) backdrop.remove();
+      document.body.classList.remove('modal-open');
+      const backdrop = document.querySelector('.modal-backdrop');
+      if (backdrop) backdrop.remove();
+    } catch (error) {
+      console.error("Failed to add project:", error);
+    }
   };
-
+  const handleDelete = async (projectId) => {
+    if (!window.confirm('Are you sure you want to delete this project?')) return;
+  
+    try {
+      await deleteProjectFromDB(projectId);
+      setProjects((prev) => prev.filter((p) => p.id !== projectId));
+      setSavedProjects((prev) => prev.filter((id) => id !== projectId));
+    } catch (err) {
+      console.error('❌ Failed to delete project:', err);
+    }
+  };
   const filteredProjects = (() => {
     const matchesSearch = (project) =>
       project.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -133,16 +175,18 @@ const Portfolio = () => {
           {filteredProjects.length > 0 ? (
             filteredProjects.map((project) => (
               <ProjectCard
-                key={project.id}
-                id={project.id}
-                title={project.title}
-                description={project.description}
-                author={project.author}
-                language={project.language}
-                image={project.image}
-                isSaved={savedProjects.includes(project.id)}
-                onSave={handleSave}
-              />
+              key={project.id}
+              id={project.id}
+              title={project.title}
+              description={project.description}
+              author={project.author}
+              language={project.language}
+              image={project.image}
+              isSaved={savedProjects.includes(project.id)}
+              onSave={handleSave}
+              onDelete={handleDelete}
+            />
+            
             ))
           ) : (
             <p className="text-center text-muted">No {selectedTab.toLowerCase()} projects found.</p>
