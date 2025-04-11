@@ -1,16 +1,44 @@
-<<<<<<< HEAD
-# React + Vite
+# Yoliday Portfolio Dashboard (Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A responsive portfolio dashboard built using **React + Vite + Bootstrap** based on a given Figma design. This project is part of the Yoliday Full Stack Developer Assessment.
 
-Currently, two official plugins are available:
+## 🚀 Live Demo
+https://traveller-u.vercel.app/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 💻 Tech Stack
 
-## Expanding the ESLint configuration
+- **Frontend:** React, Vite, JavaScript
+- **Styling:** Bootstrap 5, Bootstrap Icons
+- **Routing:** React Router DOM
+- **Form Validation:** HTML5 validation + Bootstrap classes
+- **State Management:** useState, useEffect (Context planned)
+## Features
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-=======
-# TravellerU
->>>>>>> a7d7c4035874705d7994821fa073c8368d083bbd
+- 🖼️ Responsive portfolio layout (mobile + desktop)
+- 🧭 Sidebar navigation: Dashboard | Portfolio | Inputs | Profile
+- 🔃 Bottom navigation (mobile only)
+- 🔍 Real-time search filter
+- 🧩 Project tabs: `Project | Saved | Achievement`
+- ➕ Add new project via modal with validation
+- 🛒 Save to Cart simulation (adds to "Saved" tab)
+- 💾 State management using React Hooks
+- 🌙 Clean UI with Bootstrap styling
+
+
+## 📂 Folder Structure
+
+client/
+  ├── public/ 
+  ├── src/ │
+     ├── components/ 
+       ├── Portfolio.jsx 
+       ├── ProjectCard.jsx 
+       ├── Inputs.jsx 
+       ├── Profile.jsx 
+       ├── Dashboard.jsx
+       │── FirstPage.jsx │ 
+   ├── App.jsx │ 
+   ├── index.css │ 
+   └── main.jsx
+   ├── index.html
+   └── vite.config.js
