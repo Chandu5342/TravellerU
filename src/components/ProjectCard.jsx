@@ -1,6 +1,6 @@
 function ProjectCard({ id, title, description, author, language, image, isSaved, onSave ,onDelete })
 {
-  console.log(image)
+
   return(
     <div className="col-12 col-md-10 col-lg-8">
     <div className="card">
