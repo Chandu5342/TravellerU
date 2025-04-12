@@ -34,6 +34,7 @@ const Portfolio = () => {
     try {
       const data = await fetchProjects();
       setProjects(data);
+      console.log(data);
     } catch (err) {
       console.error('Error fetching projects:', err);
     }
@@ -171,11 +172,11 @@ const Portfolio = () => {
       </ul>
 
       <div className="portfolio-scroll">
-        <div className="row g-4 justify-content-center">
+        <div className="row g-4 justify-content-left">
           {filteredProjects.length > 0 ? (
             filteredProjects.map((project) => (
               <ProjectCard
-              key={project.id}
+              key={project.id}  
               id={project.id}
               title={project.title}
               description={project.description}
